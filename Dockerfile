@@ -1,17 +1,11 @@
-# Utiliser l'image Python officielle
-FROM python:3.9-slim
+FROM python:3.12.4-slim 
 
-# Définir le répertoire de travail dans le conteneur
-WORKDIR /app
+WORKDIR /app 
 
-# Copier les fichiers du projet dans le conteneur
 COPY . /app
 
-# Installer les dépendances
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt 
 
-# Exposer le port sur lequel l'application écoute
-EXPOSE 5000
+EXPOSE 80
 
-# Lancer l'application avec Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD uvicorn app:app --host 0.0.0.0 --port $PORT 
