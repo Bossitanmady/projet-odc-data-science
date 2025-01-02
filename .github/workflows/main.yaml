@@ -14,25 +14,20 @@ jobs:
     steps:
       # Étape 1 : Récupération du dépôt
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Étape 2 : Construction, push et déploiement du conteneur Docker vers Heroku
-      - name: Build, push, and release Docker container to Heroku
-        uses: gonuit/heroku_docker_deploy
-        with:
-          # Adresse e-mail associée au compte Heroku
-          email: ${{ secrets.HEROKU_EMAIL }}
+      # Étape 2 : Connexion au registre de conteneurs Heroku
+      - name: Log in to Heroku Container Registry
+        run: echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username="${{ secrets.HEROKU_EMAIL }}" --password-stdin registry.heroku.com
 
-          # Clé API Heroku associée à l'utilisateur
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+      # Étape 3 : Construire l'image Docker
+      - name: Build Docker image
+        run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
 
-          # Nom de l'application Heroku
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+      # Étape 4 : Pousser l'image Docker vers Heroku
+      - name: Push Docker image to Heroku
+        run: docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
 
-          # (Optionnel, par défaut : "./")
-          # Répertoire contenant le Dockerfile
-          dockerfile_directory: ./
-
-          # (Optionnel, par défaut : "Dockerfile")
-          # Nom du Dockerfile
-          dockerfile_name: Dockerfile
+      # Étape 5 : Publier le conteneur Docker sur Heroku
+      - name: Release Docker image on Heroku
+        run: heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
