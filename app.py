@@ -6,6 +6,7 @@ import uvicorn
 import numpy as np
 import pandas as pd
 import joblib
+import os 
 from pydantic import BaseModel
 
 # Classe pour valider les entrées
