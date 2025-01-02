@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>API ODC - Évaluation Financière</title>
+    <link href="/static/style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container-fluid p-0">
+      <!-- Barre de navigation -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary py-3">
+        <div class="container">
+          <a class="navbar-brand" href="#">API ODC</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Prédiction du prêt</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <!-- Fin de la barre de navigation -->
+
+      <!-- Section principale -->
+      <div class="container mt-5">
+        <div class="form-container mx-auto">
+          <div class="text-center mb-4">
+            <h1 class="h4 text-primary">Évaluation des Données Financières</h1>
+            <p class="text-muted">Vérifiez si un prêt sera remboursé à temps ou non.</p>
+          </div>
+
+          <form action="/predict" method="post" id="formEvaluation">
+            <!-- Ligne 1 -->
+            <div class="form-row">
+              <div class="form-group mb-3">
+                <label for="form1" class="form-label">Statut du compte courant</label>
+                <select id="form1" class="form-select" name="checking_account_status" required>
+                  <option value="A11">A11 : Solde négatif</option>
+                  <option value="A12">A12 : 200≥ Solde ≥ 0</option>
+                  <option value="A13">A13 : Solde ≥ 200 </option>
+                  <option value="A14">A14 : Aucun compte courant</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form2" class="form-label">Durée du crédit en (mois)</label>
+                <input type="number" class="form-control" id="form2" name="duration_months" placeholder="Entrez une valeur" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form3" class="form-label">Historique de crédit</label>
+                <select id="form3" class="form-select" name="credit_history" required>
+                  <option value="A30">A30 : Aucun crédit</option>
+                  <option value="A31">A31 : Crédits remboursés</option>
+                  <option value="A32">A32 : Crédits remboursés à ce jour</option>
+                  <option value="A33">A33 : Retard de paiement</option>
+                  <option value="A34">A34 : Compte critique</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form4" class="form-label">Objet du crédit</label>
+                <select id="form4" class="form-select" name="purpose" required>
+                  <option value="A40">A40 : voiture neuve</option>
+                  <option value="A41">A41 : voiture d’occasion</option>
+                  <option value="A42">A42 : équipements</option>
+                  <option value="A43">A43 : Radio/télévision</option>
+                  <option value="A44">A44 : Électroménager</option>
+                  <option value="A45">A45 : Réparations</option>
+                  <option value="A46">A46 : Éducation</option>
+                  <option value="A48">A48 : Requalification</option>
+                  <option value="A49">A49 : Affaires</option>
+                  <option value="A410">A410 : Autres</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form5" class="form-label">Montant du crédit</label>
+                <input type="number" class="form-control" id="form5" name="credit_amount" placeholder="Entrez une valeur" required>
+              </div>
+            </div>
+            <!-- Ligne 2 -->
+            <div class="form-row">
+              <div class="form-group mb-3">
+                <label for="form6" class="form-label">Compte d’épargne</label>
+                <select id="form6" class="form-select" name="savings_account" required>
+                  <option value="A61">A61 : < 100 DM</option>
+                  <option value="A62">A62 : 100-500 DM</option>
+                  <option value="A63">A63 : 500-1000 DM</option>
+                  <option value="A64">A64 : ≥ 1000 DM</option>
+                  <option value="A65">A65 : Inconnu/Aucun</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form7" class="form-label">Durée de l'emploi actuel</label>
+                <select class="form-select" id="form7" name="employment_duration" required>
+                  <option value="A71">Sans emploi</option>
+                  <option value="A72">Moins d’un an d’emploi</option>
+                  <option value="A73">Entre 1 et 4 ans d’emploi</option>
+                  <option value="A74">Entre 4 et 7 ans d’emploi</option>
+                  <option value="A75">Plus de 7 ans d’emploi</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form8" class="form-label">Taux des mensualités</label>
+                <input type="text" class="form-control" id="form8" name="installment_rate" placeholder="Entrez une valeur" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form9" class="form-label">Statut personnel et sexe</label>
+                <select class="form-select" id="form9" name="personal_status_sex" required>
+                  <option value="A91">Homme : séparé</option>
+                  <option value="A92">Femme : divorcée</option>
+                  <option value="A93">Homme : célibataire</option>
+                  <option value="A94">Homme : marié</option>
+                  <option value="A95">Femme : célibataire</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form10" class="form-label">Autres débiteurs/garants</label>
+                <select class="form-select" id="form10" name="other_debtors" required>
+                  <option value="A101">Aucun</option>
+                  <option value="A102">Co-demandeur</option>
+                  <option value="A103">Garant</option>
+                </select>
+              </div>
+            </div>
+            <!-- Ligne 3 -->
+            <div class="form-row">
+              <div class="form-group mb-3">
+                <label for="form11" class="form-label">Durée de résidence actuelle</label>
+                <input type="number" class="form-control" id="form11" name="present_residence_years" placeholder="Entrez une valeur" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form12" class="form-label">Propriétés</label>
+                <select class="form-select" id="form12" name="property" required>
+                  <option value="A121">Bien immobilier</option>
+                  <option value="A122">Épargne</option>
+                  <option value="A123">Voiture </option>
+                  <option value="A124">Aucune propriété</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form13" class="form-label">Age en année</label>
+                <input type="number" class="form-control" id="form13" name="age_years" placeholder="Entrez une valeur" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form14" class="form-label">Autres plans paiement</label>
+                <select class="form-select" id="form14" name="other_installment_plans" required>
+                  <option value="A141">Par une banque</option>
+                  <option value="A142">Par un magasin</option>
+                  <option value="A143">Aucun</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form15" class="form-label">Type de logement</label>
+                <select class="form-select" id="form15" name="housing" required>
+                  <option value="A151">En location</option>
+                  <option value="A152">Propriétaire</option>
+                  <option value="A153">Logement gratuit</option>
+                </select>
+              </div>
+            </div>
+            <!-- Ligne 4 -->
+            <div class="form-row">
+              <div class="form-group mb-3">
+                <label for="form16" class="form-label">Nombre de crédits </label>
+                <input type="number" class="form-control" id="form16" name="number_of_credits" placeholder="Entrez une valeur" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form17" class="form-label">Emploi</label>
+                <select class="form-select" id="form17" name="job" required>
+                  <option value="A171">Sans emploi</option>
+                  <option value="A172">Non qualifié</option>
+                  <option value="A173">fonctionnaire</option>
+                  <option value="A174">Cadre compétant</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form18" class="form-label">Nombre de charges</label>
+                <input type="text" class="form-control" id="form18" name="dependents" placeholder="Entrez une valeur" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form19" class="form-label">Téléphone</label>
+                <select class="form-select" id="form19" name="telephone" required>
+                  <option value="A191">Aucun téléphone</option>
+                  <option value="A192">Téléphone client</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="form20" class="form-label">Travailleur étranger</label>
+                <select class="form-select" id="form20" name="foreign_worker" required>
+                  <option value="A201">Oui</option>
+                  <option value="A202">Non</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Bouton -->
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-primary btn-lg">
+                Prédire les caractéristiques financières
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- Section des résultats avec animation -->
+      <div id="resultSection" class="mt-2">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4 class="card-title text-center">Résultat de la Prédiction</h4>
+          </div>
+          <div class="card-body">
+            <div id="predictionResult" class="text-center mt-3">
+              <h5 class="result-text">{{prediction_text}} </h5>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <!-- Fin de la section principale -->
+    </div>
+
+    <!-- Script pour gérer l'affichage des résultats et l'animation -->
+    <!--<script src="scripts.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </body>
+</html>
