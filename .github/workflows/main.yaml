@@ -18,7 +18,7 @@ jobs:
 
       # Étape 2 : Construction, push et déploiement du conteneur Docker vers Heroku
       - name: Build, push, and release Docker container to Heroku
-        uses: gonuit/heroku_docker_deploy@v1.3.3
+        uses: gonuit/heroku_docker_deploy
         with:
           # Adresse e-mail associée au compte Heroku
           email: ${{ secrets.HEROKU_EMAIL }}
