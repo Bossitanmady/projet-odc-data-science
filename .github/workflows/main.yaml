@@ -14,33 +14,25 @@ jobs:
     steps:
       # Étape 1 : Récupération du dépôt
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      # Étape 2 : Installer le CLI Heroku
-      - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
+      # Étape 2 : Construction, push et déploiement du conteneur Docker vers Heroku
+      - name: Build, push, and release Docker container to Heroku
+        uses: gonuit/heroku_docker_deploy@v1.3.3
+        with:
+          # Adresse e-mail associée au compte Heroku
+          email: ${{ secrets.HEROKU_EMAIL }}
 
-      # Étape 3 : Connexion au registre de conteneurs Heroku
-      - name: Log in to Heroku Container Registry
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:login
+          # Clé API Heroku associée à l'utilisateur
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
 
-      # Étape 4 : Construire l'image Docker
-      - name: Build Docker image
-        run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
+          # Nom de l'application Heroku
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
 
-      # Étape 5 : Pousser l'image Docker vers Heroku
-      - name: Push Docker image to Heroku
-        run: docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+          # (Optionnel, par défaut : "./")
+          # Répertoire contenant le Dockerfile
+          dockerfile_directory: ./
 
-      # Étape 6 : Publier le conteneur Docker sur Heroku
-      - name: Release Docker image on Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
-
-      # Étape 7 : Nettoyage
-      - name: Clean up Docker images
-        run: docker image prune -f
+          # (Optionnel, par défaut : "Dockerfile")
+          # Nom du Dockerfile
+          dockerfile_name: Dockerfile
