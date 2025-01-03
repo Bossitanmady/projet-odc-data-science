@@ -1,42 +1,61 @@
+:root {
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+  --bg-color: #f8f9fa;
+  --white-color: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
 body {
-    background-color: #f8f9fa;
-  }
-  .form-container {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-  }
-  .navbar-brand {
-    font-weight: bold;
-    color: #007bff;
-  }
-  .navbar-brand:hover {
-    color: #0056b3;
-  }
-  button[type="submit"] {
-    background-color: #007bff;
-    color: white;
-    border: none;
-  }
-  button[type="submit"]:hover {
-    background-color: #0056b3;
-  }
-  .card-header {
-    background-color: #007bff;
-    color: white;
-  }
-  .spinner-border {
-    width: 3rem;
-    height: 3rem;
-  }
-  /* Centrage des lignes dans le formulaire */
-  .form-row {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-  .form-row .form-group {
-    flex: 1;
-    max-width: 200px;
-  }
+  background-color: var(--bg-color);
+}
+
+.form-container {
+  background: var(--white-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  padding: 1.5rem;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.navbar-brand:hover {
+  color: var(--primary-hover);
+}
+
+button[type="submit"] {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  border: none;
+  transition: background-color 0.3s ease-in-out;
+}
+
+button[type="submit"]:hover {
+  background-color: var(--primary-hover);
+}
+
+.card-header {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Centrage et flexibilité des lignes dans le formulaire */
+.form-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap; /* Adaptation pour les petits écrans */
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 200px;
+}

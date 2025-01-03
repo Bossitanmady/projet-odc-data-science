@@ -6,7 +6,7 @@ import uvicorn
 import numpy as np
 import pandas as pd
 import joblib
-import os 
+import os
 from pydantic import BaseModel
 
 # Classe pour valider les entrées
@@ -34,24 +34,35 @@ class InputVars(BaseModel):
 
 # Création de l'application
 app = FastAPI()
-templates = Jinja2Templates(directory='templates')
+templates = Jinja2Templates(directory="templates")
 
 # Monter le répertoire des fichiers statiques
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Chargement des modèles
+MODEL_PATHS = {
+    "logistic_model": "logistic_regression_model.pkl",
+    "scaler": "scaling.pkl",
+    "label_encoder": "labeling.pkl",
+}
+
+def load_model(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Le fichier modèle '{path}' est introuvable.")
+    return joblib.load(path)
+
 try:
-    logistic_regression_model = joblib.load('logistic_regression_model.pkl')
-    scaler = joblib.load('scaling.pkl')
-    le = joblib.load('labeling.pkl')
+    logistic_regression_model = load_model(MODEL_PATHS["logistic_model"])
+    scaler = load_model(MODEL_PATHS["scaler"])
+    le = load_model(MODEL_PATHS["label_encoder"])
 except Exception as e:
     raise RuntimeError(f"Erreur lors du chargement des modèles : {str(e)}")
 
 # Colonnes catégorielles
 categorical_columns = [
-    'checking_account_status', 'credit_history', 'purpose', 'savings_account', 
-    'personal_status_sex', 'other_debtors', 'property', 'other_installment_plans',
-    'housing', 'job', 'telephone', 'foreign_worker', 'employment_duration'
+    "checking_account_status", "credit_history", "purpose", "savings_account",
+    "personal_status_sex", "other_debtors", "property", "other_installment_plans",
+    "housing", "job", "telephone", "foreign_worker", "employment_duration"
 ]
 
 # Route principale
@@ -60,36 +71,38 @@ async def read_root(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 # Endpoint pour la prédiction
-@app.post('/predict')
-async def predict(request: Request,
-                   checking_account_status: str = Form(...),
-                   duration_months: int = Form(...),
-                   credit_history: str = Form(...),
-                   purpose: str = Form(...),
-                   credit_amount: int = Form(...),
-                   savings_account: str = Form(...),
-                   employment_duration: str = Form(...), 
-                   installment_rate: int = Form(...),
-                   personal_status_sex: str = Form(...),
-                   other_debtors: str = Form(...),
-                   present_residence_years: int = Form(...),
-                   property: str = Form(...),
-                   age_years: int = Form(...),
-                   other_installment_plans: str = Form(...), 
-                   housing: str = Form(...),
-                   number_of_credits: int = Form(...),
-                   job: str = Form(...),
-                   dependents: int = Form(...),
-                   telephone: str = Form(...),
-                   foreign_worker: str = Form(...)):
+@app.post("/predict")
+async def predict(
+    request: Request,
+    checking_account_status: str = Form(...),
+    duration_months: int = Form(...),
+    credit_history: str = Form(...),
+    purpose: str = Form(...),
+    credit_amount: int = Form(...),
+    savings_account: str = Form(...),
+    employment_duration: str = Form(...),
+    installment_rate: int = Form(...),
+    personal_status_sex: str = Form(...),
+    other_debtors: str = Form(...),
+    present_residence_years: int = Form(...),
+    property: str = Form(...),
+    age_years: int = Form(...),
+    other_installment_plans: str = Form(...),
+    housing: str = Form(...),
+    number_of_credits: int = Form(...),
+    job: str = Form(...),
+    dependents: int = Form(...),
+    telephone: str = Form(...),
+    foreign_worker: str = Form(...),
+):
     try:
         # Création du DataFrame
         columns = [
-            'checking_account_status', 'duration_months', 'credit_history', 'purpose',
-            'credit_amount', 'savings_account', 'employment_duration', 'installment_rate',
-            'personal_status_sex', 'other_debtors', 'present_residence_years', 'property',
-            'age_years', 'other_installment_plans', 'housing', 'number_of_credits',
-            'job', 'dependents', 'telephone', 'foreign_worker'
+            "checking_account_status", "duration_months", "credit_history", "purpose",
+            "credit_amount", "savings_account", "employment_duration", "installment_rate",
+            "personal_status_sex", "other_debtors", "present_residence_years", "property",
+            "age_years", "other_installment_plans", "housing", "number_of_credits",
+            "job", "dependents", "telephone", "foreign_worker"
         ]
         
         data = [
@@ -103,26 +116,27 @@ async def predict(request: Request,
 
         # Encodage des colonnes catégorielles
         for col in categorical_columns:
-            if col in df.columns:
-                if df[col].iloc[0] in le.classes_:
-                    df[col] = le.transform([df[col].iloc[0]])[0]  # Transforme la valeur
-                else:
-                    df[col] = -1  # Valeur par défaut pour les valeurs inconnues
+            if col in df.columns and df[col].iloc[0] in le.classes_:
+                df[col] = le.transform([df[col].iloc[0]])[0]
+            else:
+                df[col] = -1  # Valeur par défaut pour les valeurs inconnues
 
         # Conversion en float et mise à l'échelle
-        numeric_data = df.astype(float)
-        scaled_data = scaler.transform(numeric_data)
+        df = df.astype(float)
+        scaled_data = scaler.transform(df)
 
         # Prédiction
         prediction = logistic_regression_model.predict(scaled_data)
-  
-        result_message = "Il y a un risque que l'individu ne rembourse pas à temps" if prediction[0] == 1 else "Pas de risque, l'individu peut rembourser à temps"
+        result_message = (
+            "Il y a un risque que l'individu ne rembourse pas à temps"
+            if prediction[0] == 1
+            else "Pas de risque, l'individu peut rembourser à temps"
+        )
 
         return templates.TemplateResponse("home.html", {"request": request, "prediction_text": result_message})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur lors de la prédiction : {str(e)}")
+        raise HTTPException(status_code=500, detail="Une erreur est survenue lors de la prédiction.")
 
 # Lancement du serveur
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    uvicorn.run(app)
