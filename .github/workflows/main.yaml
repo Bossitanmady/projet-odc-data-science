@@ -1,38 +1,30 @@
-# Nom du workflow
 name: Deploy to Heroku
 
-# Déclenchement du workflow sur chaque push vers la branche principale
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
-# Définition des jobs du workflow
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Étape 1 : Récupération du dépôt
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      # Étape 1 : Vérifier le code source
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # Étape 2 : Construction, push et déploiement du conteneur Docker vers Heroku
-      - name: Build, push, and release Docker container to Heroku
-        uses: gonuit/heroku_docker_deploy@v1.3.3
-        with:
-          # Adresse e-mail associée au compte Heroku
-          email: ${{ secrets.HEROKU_EMAIL }}
+      # Étape 2 : Connexion à Heroku
+      - name: Log in to Heroku
+        run: |
+          echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
 
-          # Clé API Heroku associée à l'utilisateur
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+      # Étape 3 : Construire et pousser l'image Docker
+      - name: Build and push Docker image
+        run: |
+          heroku container:push web --app ${{ secrets.HEROKU_APP_NAME }}
 
-          # Nom de l'application Heroku
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-
-          # (Optionnel, par défaut : "./")
-          # Répertoire contenant le Dockerfile
-          dockerfile_directory: ./
-
-          # (Optionnel, par défaut : "Dockerfile")
-          # Nom du Dockerfile
-          dockerfile_name: Dockerfile
+      # Étape 4 : Relâcher l'application
+      - name: Release application
+        run: |
+          heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
